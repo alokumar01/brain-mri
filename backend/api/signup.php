@@ -1,8 +1,8 @@
 <?php
-header("Access-Control-Allow-Origin: http://localhost:3000"); // Specific origin
+header("Access-Control-Allow-Origin: http://localhost:3000");
 header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
-header("Access-Control-Allow-Credentials: true"); // Allow credentials
+header("Access-Control-Allow-Credentials: true");
 
 require '../config/db.php';
 session_start();
@@ -46,6 +46,7 @@ if ($role === 'doctor') {
     $_SESSION['user_id'] = $docId;
     $_SESSION['role'] = 'doctor';
     $response = ['success' => true, 'doc_id' => $docId];
+
 } elseif ($role === 'patient') {
     $collection = $db->patients;
     if ($collection->findOne(['email' => $email])) {
@@ -69,6 +70,31 @@ if ($role === 'doctor') {
     $response = ['success' => true, 'pat_id' => $patId];
 } else {
     $response = ['success' => false, 'message' => 'Invalid role'];
+}
+
+// ✅ Send welcome email after successful signup
+if ($response['success']) {
+    $emailData = [
+        'email' => $email,
+        'name' => $name,
+        'role' => $role,
+    ];
+
+    $options = [
+        'http' => [
+            'header'  => "Content-type: application/json",
+            'method'  => 'POST',
+            'content' => json_encode($emailData),
+        ]
+    ];
+
+    $context  = stream_context_create($options);
+    $emailResult = file_get_contents('http://localhost:3001/send-welcome-email', false, $context);
+
+    // Optional: check email sending result
+    // if ($emailResult === false) {
+    //     error_log("Email failed for: $email");
+    // }
 }
 
 echo json_encode($response);

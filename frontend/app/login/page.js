@@ -105,7 +105,7 @@ export default function Login() {
               <Select
                 onValueChange={(value) => setValue("role", value, { shouldValidate: true })}
               >
-                <SelectTrigger>
+                <SelectTrigger>    
                   <SelectValue placeholder="Select Role" />
                 </SelectTrigger>
                 <SelectContent>
